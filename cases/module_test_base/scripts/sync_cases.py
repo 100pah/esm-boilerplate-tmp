@@ -10,6 +10,7 @@ DEST_BASE_DIR_LIST = [
   '../ts-webpack5',
   '../ts-rollup',
   '../vue-ec',
+  '../ec-ssr',
 ]
 
 TPL_BASE_DIR = os.path.join(os.path.dirname(__file__), '..')
@@ -43,6 +44,7 @@ def main():
   for dest_base_dir in DEST_BASE_DIR_LIST:
     single_cp('test', dest_base_dir)
     single_cp('scripts', dest_base_dir)
+    single_cp('tsconfig.json', dest_base_dir)
 
   print('Done.')
 

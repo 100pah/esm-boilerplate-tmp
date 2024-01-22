@@ -1,0 +1,18 @@
+{
+  "name": "module_test_base",
+  "version": "1.0.0",
+  "description": "",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "echarts": "file:../../../echarts",
+    "zrender": "file:../../../zrender"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5"
+  }
+}

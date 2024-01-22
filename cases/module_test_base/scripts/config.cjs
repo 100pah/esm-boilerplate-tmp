@@ -18,11 +18,25 @@ const NODE_SRC_LIST_MAP = {
   'echarts': [
     {src: './test/esm/use_ec_esm_fext.js', copyAsESMFile: true},
     {src: './test/esm/use_ec_esm_fnoext.js', copyAsESMFile: true},
+    {src: './test/esm/use_ec_esm_ec_ssr_server_once.js', copyAsESMFile: true},
     {src: './test/cjs/use_ec_cjs.cjs'},
   ],
   'vue-echarts': [
     {src: './test/esm/use_vue_ec_esm.js', copyAsESMFile: true},
   ]
+};
+
+const TS_OUT_MAP = {
+  'echarts': [
+    'esm/use_ec_esm_ec_ssr_client.js',
+    'esm/use_ec_esm_fnoext.js',
+  ],
+};
+
+const TS_IMPORT_MAP = {
+  'imports': {
+    'echarts/ssr/client/index': '../../../../node_modules/echarts/ssr/client/index.js',
+  }
 };
 
 // Default: ['**/*.{test,spec}.?(c|m)[jt]s?(x)']
@@ -93,4 +107,13 @@ exports.getNodeSrcList = function () {
   const pkg = getPackageName();
   assert(NODE_SRC_LIST_MAP[pkg]);
   return NODE_SRC_LIST_MAP[pkg];
+};
+
+exports.getTSOut = function () {
+  const pkg = getPackageName();
+  assert(TS_OUT_MAP[pkg]);
+  return {
+    entryPathList: TS_OUT_MAP[pkg],
+    importMap: TS_IMPORT_MAP
+  };
 };

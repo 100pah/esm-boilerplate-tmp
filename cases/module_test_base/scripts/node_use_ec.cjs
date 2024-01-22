@@ -9,7 +9,7 @@ const {getNodeSrcList} = require('./config.cjs');
 async function callNode(rawPath) {
   const path = nodePath.normalize(rawPath);
   try {
-    await cmd(`node ${path}`, {NODE_RUNTIME_MODULE_LOADER: true});
+    await cmd(`node ${path}`, {env: {NODE_RUNTIME_MODULE_LOADER: true}});
   }
   catch (err) {
     console.error(err);

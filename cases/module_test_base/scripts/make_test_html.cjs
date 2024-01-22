@@ -3,7 +3,12 @@
 const nodeFS = require('fs');
 const nodePath = require('path');
 const {parseArgs} = require('util');
-const {getBundlerEntries, specifyPackageName, getPackageName} = require('./config.cjs');
+const {
+  getBundlerEntries,
+  getTSOut,
+  specifyPackageName,
+  getPackageName
+} = require('./config.cjs');
 const {setUsage, expect} = require('./helper.cjs');
 
 
@@ -48,7 +53,7 @@ ${
 </html>
 `;
 
-const makeIframeHTML = (jsPath) => `
+const makeIframeBundleHTML = (jsPath) => `
 <!DOCTYPE html>
 <html>
   <head>
@@ -64,7 +69,7 @@ const makeIframeHTML = (jsPath) => `
       #main0, x-vue-echarts {
         width: 600px;
         height: 400px;
-        pading: 0;
+        padding: 0;
         margin: 0;
       }
     </style>
@@ -74,19 +79,71 @@ const makeIframeHTML = (jsPath) => `
 </html>
 `;
 
+const makeIframeESMHTML = ({importMapJSONString, jsPath}) => `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <style>
+      html, body {
+        padding: 0;
+        margin: 0;
+      }
+      #main0, x-vue-echarts {
+        width: 600px;
+        height: 400px;
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+    <div id="main0"></div>
+    <script type="importmap">
+      ${importMapJSONString}
+    </script>
+    <script type="module" src="${jsPath}"></script>
+  </body>
+</html>
+`;
+
+
 function createHTML(pkgName) {
+  const ifrHTMLFileNameList = [];
+
   const distDirPath = nodePath.resolve(__dirname, `../dist/${pkgName}`);
   if (!nodeFS.existsSync(distDirPath)) {
     nodeFS.mkdirSync(distDirPath);
   }
 
-  const ifrHTMLFileNameList = [];
-  Object.keys(getBundlerEntries()).forEach(entryName => {
-    const ifrHTMLPath = nodePath.join(distDirPath, `${entryName}.html`);
+  Object.keys(getBundlerEntries()).forEach(entryPath => {
+    const ifrHTMLPath = nodePath.join(distDirPath, `${entryPath}.html`);
     console.log(`[test_html] ${ifrHTMLPath}`);
-    const ifrContent = makeIframeHTML(entryName);
+
+    const ifrContent = makeIframeBundleHTML(entryPath);
+
     nodeFS.writeFileSync(ifrHTMLPath, ifrContent);
-    ifrHTMLFileNameList.push(`${pkgName}/${entryName}.html`);
+    ifrHTMLFileNameList.push(`${pkgName}/${entryPath}.html`);
+  });
+
+  const distTSDirPath = nodePath.resolve(__dirname, `../dist/${pkgName}/ts_out`);
+  if (!nodeFS.existsSync(distTSDirPath)) {
+    nodeFS.mkdirSync(distTSDirPath);
+  }
+
+  const tsOut = getTSOut();
+  tsOut.entryPathList.forEach(entryPath => {
+    const ifrHTMLPath = nodePath.join(distTSDirPath, `${entryPath}.html`);
+    console.log(`[test_html_ts] ${ifrHTMLPath}`);
+
+    const ifrContent = makeIframeESMHTML({
+      importMapJSONString: JSON.stringify(tsOut.importMap),
+      jsPath: nodePath.basename(entryPath)
+    });
+
+    nodeFS.writeFileSync(ifrHTMLPath, ifrContent);
+    ifrHTMLFileNameList.push(`${pkgName}/ts_out/${entryPath}.html`);
   });
 
   const mainHTMLPath = nodePath.resolve(__dirname, `../dist/main.html`);
